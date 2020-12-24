@@ -20,17 +20,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
-public class DataService{
+public class TickerAnalysisService{
 	
 	private final BigDecimal MULTIPLICATION_FACTOR = new BigDecimal(100.0);
 	private final BigDecimal SUBSTRACTION_FACTOR = new BigDecimal(1.0);
 	private final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
 	private final DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_PATTERN);
 	
-	private final FinancialService financialService;
+	private final YahooFinancialAPIService financialService;
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 	
-	public DataService(final FinancialService financialService) {
+	public TickerAnalysisService(final YahooFinancialAPIService financialService) {
 		this.financialService = financialService;
 	}
 

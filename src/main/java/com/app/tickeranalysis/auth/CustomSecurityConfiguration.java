@@ -1,10 +1,9 @@
 package com.app.tickeranalysis.auth;
 
-import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.http.HttpMethod;
@@ -14,76 +13,51 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-
-import com.app.tickeranalysis.config.UserCredentialsConfig;
 
 @Configuration
 @EnableWebSecurity
 public class CustomSecurityConfiguration extends WebSecurityConfigurerAdapter {
-	
-	private static String REALM="HG_REALM";
-	
+
+	private static String REALM = "HG_REALM";
+
+	private CustomBasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint;
+
+	private PasswordEncoder passwordEncoder;
+
+	public CustomSecurityConfiguration(CustomBasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint,
+			PasswordEncoder passwordEncoder) {
+		this.customBasicAuthenticationEntryPoint = customBasicAuthenticationEntryPoint;
+		this.passwordEncoder = passwordEncoder;
+	}
+
 	@Autowired
-	private UserCredentialsConfig userCredentialsConfig;
+	public void configureGlobalSecurity(AuthenticationManagerBuilder auth) throws Exception {
 
-    @Autowired
-    public void configureGlobalSecurity(AuthenticationManagerBuilder auth) throws Exception {
-		
-		String[] user1Creds = userCredentialsConfig.getUser1().split(":");
-		String[] user2Creds = userCredentialsConfig.getUser2().split(":");
-
-		auth.inMemoryAuthentication().withUser(user1Creds[0]).password(passwordEncoder().encode(user1Creds[1]))
-				.authorities("ROLE_USER");
-
-		auth.inMemoryAuthentication().withUser(user2Creds[0]).password(passwordEncoder().encode(user2Creds[1]))
-				.authorities("ROLE_USER");
-    	
-    }
-     
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-  
-    	http.csrf().disable()
-        .authorizeRequests()
-        .antMatchers("/sampleAPI/analysis/**").hasAuthority("ROLE_USER")
-        .and().httpBasic().realmName(REALM).authenticationEntryPoint(getBasicAuthEntryPoint())
-        .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);	
-    	
-      http.authorizeRequests()
-        .antMatchers("/sampleAPI/**").permitAll().anyRequest().authenticated()
-        .and().httpBasic().authenticationEntryPoint(getBasicAuthEntryPoint());
-    
-    }
-     
-    @Bean
-    public CustomBasicAuthenticationEntryPoint getBasicAuthEntryPoint(){
-        return new CustomBasicAuthenticationEntryPoint();
-    }
-    
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-    
-  
-    //@Bean
-    public InMemoryUserDetailsManager inMemoryUserDetailsManager() {
-    	Properties users = null;
-		try {
-			users = PropertiesLoaderUtils.loadAllProperties("user.properties");
-		} catch (IOException e) {
-			e.printStackTrace();
+		Properties users = PropertiesLoaderUtils.loadAllProperties("user.properties");
+		for (Map.Entry<Object, Object> user : users.entrySet()) {
+			String value = (String) user.getValue();
+			String[] userCreds = value.split(":");
+			auth.inMemoryAuthentication().withUser(userCreds[0]).password(passwordEncoder.encode(userCreds[1]))
+					.authorities("ROLE_USER");
 		}
-        return new InMemoryUserDetailsManager(users);
-    }
+	}
 
-     
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers(HttpMethod.OPTIONS, "/**");
-    }
-    
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+
+		http.csrf().disable().authorizeRequests().antMatchers("/sampleAPI/analysis/**").hasAuthority("ROLE_USER").and()
+				.httpBasic().realmName(REALM).authenticationEntryPoint(customBasicAuthenticationEntryPoint).and()
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+		http.authorizeRequests().antMatchers("/sampleAPI/**").permitAll().anyRequest().authenticated().and().httpBasic()
+				.authenticationEntryPoint(customBasicAuthenticationEntryPoint);
+
+	}
+
+	@Override
+	public void configure(WebSecurity web) throws Exception {
+		web.ignoring().antMatchers(HttpMethod.OPTIONS, "/**");
+	}
+
 }

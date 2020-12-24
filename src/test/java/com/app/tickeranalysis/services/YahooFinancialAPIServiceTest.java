@@ -14,7 +14,7 @@ import com.app.tickeranalysis.config.FinancialApiConfiguration;
 import com.app.tickeranalysis.model.Range;
 
 @RunWith(SpringRunner.class)
-public class FinancialServiceTest {
+public class YahooFinancialAPIServiceTest {
 	
 	@MockBean
 	private RestTemplate restTemplate;
@@ -22,11 +22,11 @@ public class FinancialServiceTest {
 	@MockBean
 	private FinancialApiConfiguration financialApiConfiguration;
 
-	private FinancialService financialService;
+	private YahooFinancialAPIService financialService;
 	
 	@Before
 	public void setup() {
-		financialService = new FinancialService(restTemplate,financialApiConfiguration);
+		financialService = new YahooFinancialAPIService(restTemplate,financialApiConfiguration);
 	}
 
 	@Test

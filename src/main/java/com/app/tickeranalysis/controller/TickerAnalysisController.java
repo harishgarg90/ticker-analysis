@@ -15,15 +15,15 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.app.tickeranalysis.model.Range;
 import com.app.tickeranalysis.model.TickerAnanlysisResult;
-import com.app.tickeranalysis.services.DataService;
+import com.app.tickeranalysis.services.TickerAnalysisService;
 
 @RestController
-public class APIController {
+public class TickerAnalysisController {
 	
-	private final DataService dataService;
+	private final TickerAnalysisService tickerAnalysisService;
 	
-	public APIController(final DataService dataService) {
-		this.dataService = dataService;
+	public TickerAnalysisController(final TickerAnalysisService tickerAnalysisService) {
+		this.tickerAnalysisService = tickerAnalysisService;
 	}
 	
 	@GetMapping("/sampleAPI/analysis")
@@ -38,7 +38,7 @@ public class APIController {
 					"Not a valid range. Value should be one of : " + Range.getValidValues());
 
 		try {
-			List<TickerAnanlysisResult> outputResult = dataService.getData(tickerArr, rangeEnum);
+			List<TickerAnanlysisResult> outputResult = tickerAnalysisService.getData(tickerArr, rangeEnum);
 			return new ResponseEntity<>(outputResult, HttpStatus.OK);
 		} catch (IOException e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,

@@ -7,7 +7,7 @@ import com.app.tickeranalysis.config.FinancialApiConfiguration;
 import com.app.tickeranalysis.model.Range;
 
 @Service
-public class FinancialService {
+public class YahooFinancialAPIService {
 	
 	private static final String FINANCIAL_API_CONS_PARAM = "&interval=1d&indicators=quote&includeTimestamps=true";
 
@@ -15,7 +15,7 @@ public class FinancialService {
 	
 	private final FinancialApiConfiguration financialApiConfiguration;
 	
-	public FinancialService(final RestTemplate restTemplate, final FinancialApiConfiguration financialApiConfiguration) {
+	public YahooFinancialAPIService(final RestTemplate restTemplate, final FinancialApiConfiguration financialApiConfiguration) {
 		this.restTemplate = restTemplate;
 		this.financialApiConfiguration = financialApiConfiguration;
 	}
