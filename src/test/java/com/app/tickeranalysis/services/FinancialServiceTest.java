@@ -5,8 +5,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,24 +16,24 @@ import com.app.tickeranalysis.model.Range;
 @RunWith(SpringRunner.class)
 public class FinancialServiceTest {
 	
-	@Mock
+	@MockBean
 	private RestTemplate restTemplate;
 	
-	@Mock
+	@MockBean
 	private FinancialApiConfiguration financialApiConfiguration;
 
-	private FinancialService classUnderTest;
+	private FinancialService financialService;
 	
 	@Before
 	public void setup() {
-		classUnderTest = new FinancialService(restTemplate,financialApiConfiguration);
+		financialService = new FinancialService(restTemplate,financialApiConfiguration);
 	}
 
-	//@Test
+	@Test
 	public void test_getFinancialData() {
 		Mockito.when(financialApiConfiguration.getBaseUrl()).thenReturn("TEST_URL");
-		Mockito.when(restTemplate.getForObject("TEST_URL", String.class)).thenReturn("Financial api response.");
-		String response = classUnderTest.getFinancialData("ABC", Range.ONE_MONTH);
+		Mockito.when(restTemplate.getForObject(Mockito.anyString(), Mockito.any())).thenReturn("Financial api response.");
+		String response = financialService.getFinancialData("ABC", Range.ONE_MONTH);
 		Assert.assertEquals("Financial api response.", response);
 	}
 	
@@ -41,7 +41,7 @@ public class FinancialServiceTest {
 	public void cleanup() {
 		restTemplate = null;
 		financialApiConfiguration = null;
-		classUnderTest = null;
+		financialService = null;
 	}
 
 }

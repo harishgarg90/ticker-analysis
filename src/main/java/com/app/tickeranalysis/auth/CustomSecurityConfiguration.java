@@ -1,8 +1,12 @@
 package com.app.tickeranalysis.auth;
 
+import java.io.IOException;
+import java.util.Properties;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 import com.app.tickeranalysis.config.UserCredentialsConfig;
 
@@ -19,22 +24,23 @@ import com.app.tickeranalysis.config.UserCredentialsConfig;
 @EnableWebSecurity
 public class CustomSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	
-	private static String REALM="MY_TEST_REALM";
+	private static String REALM="HG_REALM";
+	
 	@Autowired
 	private UserCredentialsConfig userCredentialsConfig;
 
     @Autowired
     public void configureGlobalSecurity(AuthenticationManagerBuilder auth) throws Exception {
-        String[] user1Creds = userCredentialsConfig.getUser1().split(":");
-        String[] user2Creds = userCredentialsConfig.getUser2().split(":");
-        
-    	auth.inMemoryAuthentication().withUser(user1Creds[0])
-        .password(passwordEncoder().encode(user1Creds[1]))
-        .authorities("ROLE_USER");
-        
-        auth.inMemoryAuthentication().withUser(user2Creds[0])
-        .password(passwordEncoder().encode(user2Creds[1]))
-        .authorities("ROLE_USER");
+		
+		String[] user1Creds = userCredentialsConfig.getUser1().split(":");
+		String[] user2Creds = userCredentialsConfig.getUser2().split(":");
+
+		auth.inMemoryAuthentication().withUser(user1Creds[0]).password(passwordEncoder().encode(user1Creds[1]))
+				.authorities("ROLE_USER");
+
+		auth.inMemoryAuthentication().withUser(user2Creds[0]).password(passwordEncoder().encode(user2Creds[1]))
+				.authorities("ROLE_USER");
+    	
     }
      
     @Override
@@ -61,6 +67,19 @@ public class CustomSecurityConfiguration extends WebSecurityConfigurerAdapter {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+    
+  
+    //@Bean
+    public InMemoryUserDetailsManager inMemoryUserDetailsManager() {
+    	Properties users = null;
+		try {
+			users = PropertiesLoaderUtils.loadAllProperties("user.properties");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        return new InMemoryUserDetailsManager(users);
+    }
+
      
     @Override
     public void configure(WebSecurity web) throws Exception {
