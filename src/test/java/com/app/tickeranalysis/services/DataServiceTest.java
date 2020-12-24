@@ -55,7 +55,8 @@ public class DataServiceTest {
 
 	@After
 	public void cleanup() {
-
+		dataService = null;
+		financialService = null;
 	}
 
 }

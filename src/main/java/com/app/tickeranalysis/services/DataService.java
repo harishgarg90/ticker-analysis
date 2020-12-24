@@ -74,7 +74,7 @@ public class DataService{
 		Collections.sort(data, (day1Val, day2Val) -> {
 			BigDecimal percentMove1 = day1Val.getMove().abs();
 			BigDecimal percentMove2 = day2Val.getMove().abs();
-			return percentMove1.compareTo(percentMove2);
+			return percentMove2.compareTo(percentMove1);
 		});
 
 		// collect top 5 percent move
